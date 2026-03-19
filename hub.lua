@@ -1,44 +1,156 @@
--- 🌌 SUPERNOVA HUB (SIMPLES E FUNCIONANDO)
+-- 🌌 SUPERNOVA HUB FULL
 
--- TESTE (pra garantir que carregou)
-print("SUPERNOVA CARREGOU")
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-game.StarterGui:SetCore("SendNotification", {
-    Title = "SUPERNOVA",
-    Text = "Hub iniciado!",
-    Duration = 5
+local Window = Rayfield:CreateWindow({
+    Name = "🌌 SUPERNOVA HUB",
+    LoadingTitle = "Supernova",
+    LoadingSubtitle = "by Vini",
 })
 
-local player = game.Players.LocalPlayer
+local Player = game.Players.LocalPlayer
 
--- CRIAR GUI SIMPLES
-local gui = Instance.new("ScreenGui")
-gui.Name = "Supernova"
-gui.Parent = player:WaitForChild("PlayerGui")
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 250, 0, 200)
-frame.Position = UDim2.new(0.5, -125, 0.5, -100)
-frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-frame.Parent = gui
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,40)
-title.Text = "🌌 SUPERNOVA HUB"
-title.TextColor3 = Color3.new(1,1,1)
-title.BackgroundColor3 = Color3.fromRGB(0,0,0)
-title.Parent = frame
-
--- BOTÃO TESTE
-local btn = Instance.new("TextButton")
-btn.Size = UDim2.new(0,200,0,50)
-btn.Position = UDim2.new(0.5,-100,0,80)
-btn.Text = "Speed x2"
-btn.Parent = frame
-
-btn.MouseButton1Click:Connect(function()
-    local hum = player.Character and player.Character:FindFirstChild("Humanoid")
-    if hum then
-        hum.WalkSpeed = 32
+-- PEGAR BOLA
+local function getBall()
+    for _,v in pairs(workspace:GetDescendants()) do
+        if v.Name:lower():find("ball") then
+            return v
+        end
     end
-end)
+end
+
+-- MAIN
+local Main = Window:CreateTab("Main")
+
+Main:CreateToggle({
+    Name = "Auto Follow Ball",
+    CurrentValue = false,
+    Callback = function(v)
+        _G.follow = v
+        while _G.follow do
+            task.wait(0.15)
+            local b = getBall()
+            if b then
+                Player.Character:MoveTo(b.Position)
+            end
+        end
+    end
+})
+
+Main:CreateToggle({
+    Name = "Aim Assist",
+    CurrentValue = false,
+    Callback = function(v)
+        _G.aim = v
+        while _G.aim do
+            task.wait()
+            local b = getBall()
+            if b and Player.Character then
+                local root = Player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    root.CFrame = CFrame.new(root.Position, b.Position)
+                end
+            end
+        end
+    end
+})
+
+Main:CreateToggle({
+    Name = "Auto Position Pro",
+    CurrentValue = false,
+    Callback = function(v)
+        _G.pos = v
+        while _G.pos do
+            task.wait(0.2)
+            local b = getBall()
+            if b then
+                Player.Character:MoveTo(b.Position + Vector3.new(0,5,0))
+            end
+        end
+    end
+})
+
+-- PLAYER
+local PlayerTab = Window:CreateTab("Player")
+
+PlayerTab:CreateSlider({
+    Name = "Speed",
+    Range = {16,50},
+    CurrentValue = 16,
+    Callback = function(v)
+        Player.Character.Humanoid.WalkSpeed = v
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "Jump Power",
+    Range = {50,120},
+    CurrentValue = 50,
+    Callback = function(v)
+        Player.Character.Humanoid.JumpPower = v
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "Air Control",
+    CurrentValue = false,
+    Callback = function(v)
+        _G.air = v
+        while _G.air do
+            task.wait()
+            local hum = Player.Character:FindFirstChild("Humanoid")
+            if hum and hum.FloorMaterial == Enum.Material.Air then
+                Player.Character:TranslateBy(Vector3.new(0,0.25,0))
+            end
+        end
+    end
+})
+
+-- VISUAL
+local Visual = Window:CreateTab("Visual")
+
+Visual:CreateToggle({
+    Name = "ESP Players",
+    CurrentValue = false,
+    Callback = function(v)
+        for _,p in pairs(game.Players:GetPlayers()) do
+            if p ~= Player and p.Character then
+                if v then
+                    if not p.Character:FindFirstChild("ESP") then
+                        local h = Instance.new("Highlight")
+                        h.Name = "ESP"
+                        h.FillColor = Color3.fromRGB(0,255,255)
+                        h.Parent = p.Character
+                    end
+                else
+                    if p.Character:FindFirstChild("ESP") then
+                        p.Character.ESP:Destroy()
+                    end
+                end
+            end
+        end
+    end
+})
+
+Visual:CreateToggle({
+    Name = "ESP Ball",
+    CurrentValue = false,
+    Callback = function(v)
+        for _,b in pairs(workspace:GetDescendants()) do
+            if b.Name:lower():find("ball") then
+                if v then
+                    if not b:FindFirstChild("ESP") then
+                        local h = Instance.new("Highlight")
+                        h.Name = "ESP"
+                        h.FillColor = Color3.fromRGB(255,0,255)
+                        h.Parent = b
+                    end
+                else
+                    if b:FindFirstChild("ESP") then
+                        b.ESP:Destroy()
+                    end
+                end
+            end
+        end
+    end
+})

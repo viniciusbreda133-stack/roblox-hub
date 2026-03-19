@@ -1,93 +1,94 @@
-local ScreenGui = Instance.new("ScreenGui")
-local Main = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local Close = Instance.new("TextButton")
+-- SERVICES
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
-local Speed = Instance.new("TextButton")
-local Jump = Instance.new("TextButton")
-local Power = Instance.new("TextButton")
+-- GUI BASE
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "VB_PRO_MAX"
 
-ScreenGui.Parent = game.CoreGui
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 330, 0, 450)
+frame.Position = UDim2.new(0.5, -165, 0.5, -225)
+frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+frame.Active = true
+frame.Draggable = true
 
--- MAIN
-Main.Parent = ScreenGui
-Main.Size = UDim2.new(0,400,0,250)
-Main.Position = UDim2.new(0.3,0,0.3,0)
-Main.BackgroundColor3 = Color3.fromRGB(20,20,20)
-Main.Active = true
+-- TITULO
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,40)
+title.Text = "VB LEGENDS PRO MAX"
+title.BackgroundColor3 = Color3.fromRGB(0,0,0)
+title.TextColor3 = Color3.new(1,1,1)
 
--- DRAG
-local UIS = game:GetService("UserInputService")
-local dragging, dragInput, dragStart, startPos
+-- FUNÇÃO DE BOTÃO TOGGLE
+local function criarToggle(nome, posY, callback)
+    local estado = false
+    
+    local btn = Instance.new("TextButton", frame)
+    btn.Size = UDim2.new(0, 260, 0, 40)
+    btn.Position = UDim2.new(0.5, -130, 0, posY)
+    btn.Text = nome .. " [OFF]"
+    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
 
-Main.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = Main.Position
-	end
+    btn.MouseButton1Click:Connect(function()
+        estado = not estado
+        btn.Text = nome .. (estado and " [ON]" or " [OFF]")
+        callback(estado)
+    end)
+end
+
+-- SPEED CONTROLADO (mais seguro)
+criarToggle("Speed Boost", 60, function(on)
+    if on then
+        player.Character.Humanoid.WalkSpeed = 24
+    else
+        player.Character.Humanoid.WalkSpeed = 16
+    end
 end)
 
-Main.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
-	end
+-- JUMP CONTROLADO
+criarToggle("Jump Boost", 110, function(on)
+    if on then
+        player.Character.Humanoid.JumpPower = 70
+    else
+        player.Character.Humanoid.JumpPower = 50
+    end
 end)
 
-UIS.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		local delta = input.Position - dragStart
-		Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
+-- AUTO IR NA BOLA (semi legit)
+criarToggle("Auto Ball Follow", 160, function(on)
+    while on do
+        task.wait(0.2)
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name:lower():find("ball") then
+                player.Character:MoveTo(v.Position)
+            end
+        end
+    end
 end)
 
--- TITLE
-Title.Parent = Main
-Title.Size = UDim2.new(1,0,0,40)
-Title.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Title.Text = "Volleyball Hub"
-Title.TextColor3 = Color3.new(1,1,1)
-Title.TextScaled = true
-
--- CLOSE
-Close.Parent = Main
-Close.Size = UDim2.new(0,40,0,40)
-Close.Position = UDim2.new(1,-40,0,0)
-Close.Text = "X"
-Close.BackgroundColor3 = Color3.fromRGB(170,0,0)
-
-Close.MouseButton1Click:Connect(function()
-	ScreenGui:Destroy()
+-- ESP PLAYERS
+criarToggle("ESP Players", 210, function(on)
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= player and v.Character then
+            if on then
+                local h = Instance.new("Highlight")
+                h.Name = "ESP"
+                h.Parent = v.Character
+            else
+                if v.Character:FindFirstChild("ESP") then
+                    v.Character.ESP:Destroy()
+                end
+            end
+        end
+    end
 end)
 
--- SPEED
-Speed.Parent = Main
-Speed.Size = UDim2.new(0,150,0,40)
-Speed.Position = UDim2.new(0.1,0,0.3,0)
-Speed.Text = "Speed"
-
-Speed.MouseButton1Click:Connect(function()
-	game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 80
-end)
-
--- JUMP
-Jump.Parent = Main
-Jump.Size = UDim2.new(0,150,0,40)
-Jump.Position = UDim2.new(0.1,0,0.55,0)
-Jump.Text = "Super Jump"
-
-Jump.MouseButton1Click:Connect(function()
-	game.Players.LocalPlayer.Character.Humanoid.JumpPower = 150
-end)
-
--- POWER (simulado)
-Power.Parent = Main
-Power.Size = UDim2.new(0,150,0,40)
-Power.Position = UDim2.new(0.55,0,0.3,0)
-Power.Text = "Power Hit"
-
-Power.MouseButton1Click:Connect(function()
-	game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
-	wait(1)
-	game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+-- ANTI AFK
+criarToggle("Anti AFK", 260, function(on)
+    if on then
+        for _, v in pairs(getconnections(player.Idled)) do
+            v:Disable()
+        end
+    end
 end)

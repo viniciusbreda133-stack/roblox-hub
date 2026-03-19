@@ -1,16 +1,16 @@
--- 🌌 SUPERNOVA HUB GOD FINAL
+-- 🌌 SUPERNOVA HUB GOD INSANO
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 
--- esperar personagem
+-- CHARACTER SAFE
 local function getChar()
     return Player.Character or Player.CharacterAdded:Wait()
 end
 
--- pegar bola
+-- BALL FINDER
 local function getBall()
     for _,v in pairs(workspace:GetDescendants()) do
         if v.Name:lower():find("ball") then
@@ -19,25 +19,27 @@ local function getBall()
     end
 end
 
+-- WINDOW
 local Window = Rayfield:CreateWindow({
     Name = "🌌 SUPERNOVA HUB",
-    LoadingTitle = "Supernova",
+    LoadingTitle = "SUPERNOVA",
     LoadingSubtitle = "GOD MODE",
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = "Supernova"
+        FolderName = "Supernova",
+        FileName = "Config"
     }
 })
 
 -- 🌟 MAIN
-local Main = Window:CreateTab("Main")
+local Main = Window:CreateTab("🌟 Main", 4483362458)
 
 Main:CreateToggle({
-    Name = "Auto Ball",
+    Name = "🤖 Auto Play (Follow Ball)",
     CurrentValue = false,
     Callback = function(v)
-        _G.ball = v
-        while _G.ball do
+        _G.auto = v
+        while _G.auto do
             task.wait(0.1)
             local char = getChar()
             local ball = getBall()
@@ -49,7 +51,7 @@ Main:CreateToggle({
 })
 
 Main:CreateToggle({
-    Name = "Aim Assist GOD",
+    Name = "🎯 Aim Assist PRO",
     CurrentValue = false,
     Callback = function(v)
         _G.aim = v
@@ -65,51 +67,80 @@ Main:CreateToggle({
     end
 })
 
+Main:CreateToggle({
+    Name = "⚡ Auto Position",
+    CurrentValue = false,
+    Callback = function(v)
+        _G.pos = v
+        while _G.pos do
+            task.wait(0.15)
+            local char = getChar()
+            local ball = getBall()
+            if char and ball then
+                char:MoveTo(ball.Position + Vector3.new(0,5,0))
+            end
+        end
+    end
+})
+
 -- ⚡ PLAYER
-local PlayerTab = Window:CreateTab("Player")
+local PlayerTab = Window:CreateTab("⚡ Player", 4483362458)
 
 PlayerTab:CreateSlider({
-    Name = "Speed",
-    Range = {16,80},
+    Name = "🏃 Speed",
+    Range = {16,100},
     Increment = 1,
     CurrentValue = 16,
     Callback = function(v)
-        local char = getChar()
-        local hum = char:FindFirstChild("Humanoid")
+        local hum = getChar():FindFirstChild("Humanoid")
         if hum then hum.WalkSpeed = v end
     end
 })
 
 PlayerTab:CreateSlider({
-    Name = "Jump Power",
-    Range = {50,200},
+    Name = "🦘 Jump Power",
+    Range = {50,250},
     Increment = 5,
     CurrentValue = 50,
     Callback = function(v)
-        local char = getChar()
-        local hum = char:FindFirstChild("Humanoid")
+        local hum = getChar():FindFirstChild("Humanoid")
         if hum then hum.JumpPower = v end
     end
 })
 
+PlayerTab:CreateToggle({
+    Name = "🪽 Infinite Jump",
+    CurrentValue = false,
+    Callback = function(v)
+        _G.infjump = v
+        game:GetService("UserInputService").JumpRequest:Connect(function()
+            if _G.infjump then
+                local hum = getChar():FindFirstChild("Humanoid")
+                if hum then hum:ChangeState("Jumping") end
+            end
+        end)
+    end
+})
+
 -- 👁️ VISUAL
-local Visual = Window:CreateTab("Visual")
+local Visual = Window:CreateTab("👁️ Visual", 4483362458)
 
 Visual:CreateToggle({
-    Name = "ESP Players",
+    Name = "👤 ESP Players",
     CurrentValue = false,
     Callback = function(v)
         for _,p in pairs(Players:GetPlayers()) do
             if p ~= Player and p.Character then
                 if v then
                     if not p.Character:FindFirstChild("ESP") then
-                        Instance.new("Highlight", p.Character)
+                        local h = Instance.new("Highlight")
+                        h.Name = "ESP"
+                        h.FillColor = Color3.fromRGB(0,255,255)
+                        h.Parent = p.Character
                     end
                 else
-                    for _,x in pairs(p.Character:GetChildren()) do
-                        if x:IsA("Highlight") then
-                            x:Destroy()
-                        end
+                    if p.Character:FindFirstChild("ESP") then
+                        p.Character.ESP:Destroy()
                     end
                 end
             end
@@ -118,14 +149,17 @@ Visual:CreateToggle({
 })
 
 Visual:CreateToggle({
-    Name = "ESP Ball",
+    Name = "🏐 ESP Ball",
     CurrentValue = false,
     Callback = function(v)
         for _,b in pairs(workspace:GetDescendants()) do
             if b.Name:lower():find("ball") then
                 if v then
                     if not b:FindFirstChild("ESP") then
-                        Instance.new("Highlight", b)
+                        local h = Instance.new("Highlight")
+                        h.Name = "ESP"
+                        h.FillColor = Color3.fromRGB(255,0,255)
+                        h.Parent = b
                     end
                 else
                     if b:FindFirstChild("ESP") then
@@ -135,4 +169,35 @@ Visual:CreateToggle({
             end
         end
     end
+})
+
+-- ⚙️ EXTRA
+local Extra = Window:CreateTab("⚙️ Extra", 4483362458)
+
+Extra:CreateButton({
+    Name = "🔄 Rejoin",
+    Callback = function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
+    end
+})
+
+Extra:CreateButton({
+    Name = "💀 Reset",
+    Callback = function()
+        local hum = getChar():FindFirstChild("Humanoid")
+        if hum then hum.Health = 0 end
+    end
+})
+
+Extra:CreateButton({
+    Name = "📋 Copy Script",
+    Callback = function()
+        setclipboard('loadstring(game:HttpGet("https://raw.githubusercontent.com/viniciusbreda133-stack/roblox-hub/main/hub.lua"))()')
+    end
+})
+
+Rayfield:Notify({
+    Title = "SUPERNOVA",
+    Content = "Carregado com sucesso 🚀",
+    Duration = 5
 })

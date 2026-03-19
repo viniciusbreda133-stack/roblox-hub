@@ -143,3 +143,10 @@ Visual:CreateToggle({
        end
    end
 })
+print("CARREGOU")
+
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Hub",
+    Text = "Funcionando!",
+    Duration = 5
+})

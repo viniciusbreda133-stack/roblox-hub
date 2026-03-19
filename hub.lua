@@ -1,94 +1,145 @@
--- SERVICES
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source"))()
 
--- GUI BASE
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "VB_PRO_MAX"
+local Window = Library:CreateWindow({
+   Name = "VB Legends PRO MAX+",
+   LoadingTitle = "Carregando...",
+   LoadingSubtitle = "by Vini",
+})
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 330, 0, 450)
-frame.Position = UDim2.new(0.5, -165, 0.5, -225)
-frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
-frame.Active = true
-frame.Draggable = true
+local player = game.Players.LocalPlayer
 
--- TITULO
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0,40)
-title.Text = "VB LEGENDS PRO MAX"
-title.BackgroundColor3 = Color3.fromRGB(0,0,0)
-title.TextColor3 = Color3.new(1,1,1)
-
--- FUNÇÃO DE BOTÃO TOGGLE
-local function criarToggle(nome, posY, callback)
-    local estado = false
-    
-    local btn = Instance.new("TextButton", frame)
-    btn.Size = UDim2.new(0, 260, 0, 40)
-    btn.Position = UDim2.new(0.5, -130, 0, posY)
-    btn.Text = nome .. " [OFF]"
-    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-
-    btn.MouseButton1Click:Connect(function()
-        estado = not estado
-        btn.Text = nome .. (estado and " [ON]" or " [OFF]")
-        callback(estado)
-    end)
+-- FUNÇÃO PEGAR BOLA
+local function getBall()
+    for _,v in pairs(workspace:GetDescendants()) do
+        if v.Name:lower():find("ball") then
+            return v
+        end
+    end
 end
 
--- SPEED CONTROLADO (mais seguro)
-criarToggle("Speed Boost", 60, function(on)
-    if on then
-        player.Character.Humanoid.WalkSpeed = 24
-    else
-        player.Character.Humanoid.WalkSpeed = 16
-    end
-end)
+-- MAIN
+local Main = Window:CreateTab("Main")
 
--- JUMP CONTROLADO
-criarToggle("Jump Boost", 110, function(on)
-    if on then
-        player.Character.Humanoid.JumpPower = 70
-    else
-        player.Character.Humanoid.JumpPower = 50
-    end
-end)
+Main:CreateToggle({
+   Name = "Auto Ball Follow",
+   CurrentValue = false,
+   Callback = function(Value)
+       _G.AutoBall = Value
+       while _G.AutoBall do
+           task.wait(0.15)
+           local ball = getBall()
+           if ball then
+               player.Character:MoveTo(ball.Position)
+           end
+       end
+   end
+})
 
--- AUTO IR NA BOLA (semi legit)
-criarToggle("Auto Ball Follow", 160, function(on)
-    while on do
-        task.wait(0.2)
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v.Name:lower():find("ball") then
-                player.Character:MoveTo(v.Position)
-            end
-        end
-    end
-end)
+Main:CreateToggle({
+   Name = "Aim Assist Ball",
+   CurrentValue = false,
+   Callback = function(Value)
+       _G.Aim = Value
+       while _G.Aim do
+           task.wait()
+           local ball = getBall()
+           if ball and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+               local root = player.Character.HumanoidRootPart
+               root.CFrame = CFrame.new(root.Position, ball.Position)
+           end
+       end
+   end
+})
 
--- ESP PLAYERS
-criarToggle("ESP Players", 210, function(on)
-    for _, v in pairs(Players:GetPlayers()) do
-        if v ~= player and v.Character then
-            if on then
-                local h = Instance.new("Highlight")
-                h.Name = "ESP"
-                h.Parent = v.Character
-            else
-                if v.Character:FindFirstChild("ESP") then
-                    v.Character.ESP:Destroy()
-                end
-            end
-        end
-    end
-end)
+Main:CreateToggle({
+   Name = "Auto Position (Inteligente)",
+   CurrentValue = false,
+   Callback = function(Value)
+       _G.Pos = Value
+       while _G.Pos do
+           task.wait(0.2)
+           local ball = getBall()
+           if ball then
+               local pos = ball.Position + Vector3.new(0,5,0)
+               player.Character:MoveTo(pos)
+           end
+       end
+   end
+})
 
--- ANTI AFK
-criarToggle("Anti AFK", 260, function(on)
-    if on then
-        for _, v in pairs(getconnections(player.Idled)) do
-            v:Disable()
-        end
-    end
-end)
+-- PLAYER
+local PlayerTab = Window:CreateTab("Player")
+
+PlayerTab:CreateSlider({
+   Name = "Speed",
+   Range = {16, 40},
+   Increment = 1,
+   CurrentValue = 16,
+   Callback = function(Value)
+       player.Character.Humanoid.WalkSpeed = Value
+   end
+})
+
+PlayerTab:CreateSlider({
+   Name = "Jump Power",
+   Range = {50, 120},
+   Increment = 5,
+   CurrentValue = 50,
+   Callback = function(Value)
+       player.Character.Humanoid.JumpPower = Value
+   end
+})
+
+PlayerTab:CreateToggle({
+   Name = "Air Control",
+   CurrentValue = false,
+   Callback = function(Value)
+       _G.Air = Value
+       while _G.Air do
+           task.wait()
+           local hum = player.Character:FindFirstChild("Humanoid")
+           if hum and hum.FloorMaterial == Enum.Material.Air then
+               player.Character:TranslateBy(Vector3.new(0,0.2,0))
+           end
+       end
+   end
+})
+
+-- VISUAL
+local Visual = Window:CreateTab("Visual")
+
+Visual:CreateToggle({
+   Name = "Ball ESP",
+   CurrentValue = false,
+   Callback = function(Value)
+       for _,v in pairs(workspace:GetDescendants()) do
+           if v.Name:lower():find("ball") then
+               if Value then
+                   Instance.new("Highlight", v)
+               else
+                   if v:FindFirstChildOfClass("Highlight") then
+                       v:FindFirstChildOfClass("Highlight"):Destroy()
+                   end
+               end
+           end
+       end
+   end
+})
+
+Visual:CreateToggle({
+   Name = "Player ESP",
+   CurrentValue = false,
+   Callback = function(Value)
+       for _,v in pairs(game.Players:GetPlayers()) do
+           if v ~= player and v.Character then
+               if Value then
+                   Instance.new("Highlight", v.Character)
+               else
+                   if v.Character:FindFirstChildOfClass("Highlight") then
+                       v.Character:FindFirstChildOfClass("Highlight"):Destroy()
+                   end
+               end
+           end
+       end
+   end
+})

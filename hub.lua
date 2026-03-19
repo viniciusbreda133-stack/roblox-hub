@@ -1,4 +1,4 @@
--- 🌌 SUPERNOVA HUB ULTRA GOD
+-- 🌌 SUPERNOVA HUB ALL IN ONE (SEM ERRO)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -6,12 +6,22 @@ local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 
--- SAFE CHAR
+-- SAFE SYSTEM
 local function getChar()
     return Player.Character or Player.CharacterAdded:Wait()
 end
 
--- BALL
+local function getHum()
+    local char = getChar()
+    return char:FindFirstChildOfClass("Humanoid")
+end
+
+local function getRoot()
+    local char = getChar()
+    return char:FindFirstChild("HumanoidRootPart")
+end
+
+-- BALL FINDER
 local function getBall()
     for _,v in pairs(workspace:GetDescendants()) do
         if v.Name:lower():find("ball") then
@@ -24,11 +34,11 @@ end
 local Window = Rayfield:CreateWindow({
     Name = "🌌 SUPERNOVA HUB",
     LoadingTitle = "SUPERNOVA",
-    LoadingSubtitle = "ULTRA GOD",
+    LoadingSubtitle = "ALL IN ONE",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "Supernova",
-        FileName = "Ultra"
+        FileName = "Config"
     }
 })
 
@@ -36,7 +46,7 @@ local Window = Rayfield:CreateWindow({
 local Main = Window:CreateTab("🌟 Main")
 
 Main:CreateToggle({
-    Name = "🤖 Auto Play",
+    Name = "Auto Play",
     CurrentValue = false,
     Callback = function(v)
         _G.auto = v
@@ -54,18 +64,17 @@ Main:CreateToggle({
 })
 
 Main:CreateToggle({
-    Name = "🎯 Aim Assist GOD",
+    Name = "Aim Assist",
     CurrentValue = false,
     Callback = function(v)
         _G.aim = v
         task.spawn(function()
             while _G.aim do
                 task.wait()
-                local char = getChar()
+                local root = getRoot()
                 local ball = getBall()
-                if char and ball and char:FindFirstChild("HumanoidRootPart") then
-                    char.HumanoidRootPart.CFrame =
-                        CFrame.new(char.HumanoidRootPart.Position, ball.Position)
+                if root and ball then
+                    root.CFrame = CFrame.new(root.Position, ball.Position)
                 end
             end
         end)
@@ -73,7 +82,7 @@ Main:CreateToggle({
 })
 
 Main:CreateToggle({
-    Name = "⚡ Auto Position",
+    Name = "Auto Position",
     CurrentValue = false,
     Callback = function(v)
         _G.pos = v
@@ -98,7 +107,7 @@ PlayerTab:CreateSlider({
     Range = {16,100},
     CurrentValue = 16,
     Callback = function(v)
-        local hum = getChar():FindFirstChild("Humanoid")
+        local hum = getHum()
         if hum then hum.WalkSpeed = v end
     end
 })
@@ -108,7 +117,7 @@ PlayerTab:CreateSlider({
     Range = {50,250},
     CurrentValue = 50,
     Callback = function(v)
-        local hum = getChar():FindFirstChild("Humanoid")
+        local hum = getHum()
         if hum then hum.JumpPower = v end
     end
 })
@@ -123,7 +132,7 @@ PlayerTab:CreateToggle({
 
 UIS.JumpRequest:Connect(function()
     if _G.infjump then
-        local hum = getChar():FindFirstChild("Humanoid")
+        local hum = getHum()
         if hum then hum:ChangeState("Jumping") end
     end
 end)
@@ -232,13 +241,13 @@ Extra:CreateButton({
 Extra:CreateButton({
     Name = "Reset",
     Callback = function()
-        local hum = getChar():FindFirstChild("Humanoid")
+        local hum = getHum()
         if hum then hum.Health = 0 end
     end
 })
 
 Rayfield:Notify({
     Title = "SUPERNOVA",
-    Content = "Modo ULTRA GOD ativado 💀",
+    Content = "Carregado sem erro 💀🔥",
     Duration = 5
 })

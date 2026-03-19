@@ -1,55 +1,195 @@
--- Super Mega Ultra Volleyball Legends Hack 2026 - Lucky Spin + Hitbox + Gems + Euros -- Por: Fabio o Rei do Sertão (não use em main, por favor)
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui")
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
 
--- Key system fake (só pra parecer pro)
-local correctKey = "FABIOREIDOSERTAO2026" -- muda aqui pra tua key secreta
-local keyEntered = false
+local localPlayer = Players.LocalPlayer
 
--- Cria GUI principal
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "VolleyballLegendsUltraHackV3.1"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = gui
+-- VARS
+local running = false
+local rewardId = 1
+local antiAfk = nil
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 380, 0, 480)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -240)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
-MainFrame.BorderSizePixel = 0
-MainFrame.Parent = ScreenGui
-MainFrame.Visible = false
+local bypassAtivo = false
+local pityBugada = false
+local nickRemovido = false
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 16)
-UICorner.Parent = MainFrame
+-- WINDOW
+local Window = Rayfield:CreateWindow({
+   Name = "Banana VBL (não tem relação com banana hub)",
+   LoadingTitle = "Método Lucky Spin da Banana",
+   LoadingSubtitle = "Inicializando...",
+   Theme = "AmberGlow",
+   ToggleUIKeybind = "F8",
 
-local UIGradient = Instance.new("UIGradient")
-UIGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 120, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 180))
-}
-UIGradient.Rotation = 45
-UIGradient.Parent = MainFrame
+   ConfigurationSaving = {
+      Enabled = true,
+      FileName = "BananaVBL"
+   }
+})
 
--- Título longo pra TikTok
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 60)
-Title.Position = UDim2.new(0, 0, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "SUPER MEGA ULTRA VOLLEYBALL LEGENDS HACK 2026 - GEMS + SPINS + HITBOX"
-Title.TextColor3 = Color3.new(1,1,1)
-Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 22
-Title.TextWrapped = true
-Title.Parent = MainFrame
+-- TABS
+local tabAutomation = Window:CreateTab("🍌 LuckySpin", 4483362458)
+local tabPlayer = Window:CreateTab("👤 Jogador", 4483362458)
+local tabUI = Window:CreateTab("⚙️ Menu", 4483362458)
 
--- Campo de key
-local KeyBox = Instance.new("TextBox")
-KeyBox.Size = UDim2.new(0.8, 0, 0, 50)
-KeyBox.Position = UDim2.new(0.1, 0, 0.2, 0)
-KeyBox.BackgroundColor3 = Color3.fromRGB(40, 40
+-- =========================
+-- 🍌 AUTO REWARD (MELHORADO)
+-- =========================
+
+tabAutomation:CreateSection("Recompensas")
+
+tabAutomation:CreateToggle({
+   Name = "Auto Coletar Recompensas",
+   CurrentValue = false,
+   Flag = "AutoRewards",
+
+   Callback = function(state)
+      running = state
+
+      if running then
+
+         rewardId = 1
+
+         local claim = ReplicatedStorage
+            :WaitForChild("Packages")
+            :WaitForChild("_Index")
+            :WaitForChild("sleitnick_knit@1.7.0")
+            :WaitForChild("knit")
+            :WaitForChild("Services")
+            :WaitForChild("ChallengeService")
+            :WaitForChild("RF")
+            :WaitForChild("ClaimReward")
+
+         task.spawn(function()
+            while running do
+
+               local success = pcall(function()
+                  claim:InvokeServer(rewardId)
+               end)
+
+               if success then
+                  rewardId += 1
+               else
+                  rewardId = 1
+               end
+
+               task.wait(0.7) -- mais suave
+            end
+         end)
+      end
+   end
+})
+
+-- =========================
+-- 🔰 BYPASS (mantido, mas seguro)
+-- =========================
+
+tabAutomation:CreateToggle({
+   Name = "🔰 Bypass Anti-Ban (70% menos chance)",
+   CurrentValue = false,
+   Flag = "BypassAntiBan",
+   Callback = function(state)
+      bypassAtivo = state
+
+      Rayfield:Notify({
+         Title = "🔰 BYPASS",
+         Content = state and "Ativado" or "Desativado",
+         Duration = 2
+      })
+   end
+})
+
+tabAutomation:CreateToggle({
+   Name = "⚡ Pity Bugada (reset infinito)",
+   CurrentValue = false,
+   Flag = "PityBug",
+   Callback = function(state)
+      pityBugada = state
+
+      Rayfield:Notify({
+         Title = "⚡ PITY",
+         Content = state and "Ativado" or "Desativado",
+         Duration = 2
+      })
+   end
+})
+
+-- =========================
+-- 👤 PLAYER
+-- =========================
+
+tabPlayer:CreateSection("Jogador")
+
+tabPlayer:CreateToggle({
+   Name = "👤 Modo Anônimo (remove nick dos logs)",
+   CurrentValue = false,
+   Flag = "ModoAnonimo",
+   Callback = function(state)
+      nickRemovido = state
+
+      Rayfield:Notify({
+         Title = "👤 MODO ANÔNIMO",
+         Content = state and "Ativado" or "Desativado",
+         Duration = 2
+      })
+   end
+})
+
+tabPlayer:CreateToggle({
+   Name = "Anti-AFK",
+   CurrentValue = false,
+   Flag = "AntiAfk",
+
+   Callback = function(enabled)
+
+      if enabled then
+
+         if antiAfk then
+            antiAfk:Disconnect()
+         end
+
+         antiAfk = localPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+         end)
+
+      else
+
+         if antiAfk then
+            antiAfk:Disconnect()
+            antiAfk = nil
+         end
+
+      end
+   end
+})
+
+-- =========================
+-- ⚙️ MENU
+-- =========================
+
+tabUI:CreateSection("Interface")
+
+tabUI:CreateButton({
+   Name = "Fechar Interface",
+   Callback = function()
+      Rayfield:Destroy()
+   end
+})
+
+tabUI:CreateParagraph({
+   Title = "Atalho",
+   Content = "Pressione F8 para abrir ou esconder o menu."
+})
+
+-- =========================
+-- START
+-- =========================
+
+Rayfield:Notify({
+   Title = "Banana VBL 🍌",
+   Content = "Script carregado (versão otimizada)",
+   Duration = 4
+})

@@ -1,16 +1,16 @@
--- 🌌 SUPERNOVA HUB FULL
+-- 🌌 SUPERNOVA HUB FINAL
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
     Name = "🌌 SUPERNOVA HUB",
     LoadingTitle = "Supernova",
-    LoadingSubtitle = "by Vini",
+    LoadingSubtitle = "by Vini"
 })
 
 local Player = game.Players.LocalPlayer
 
--- PEGAR BOLA
+-- BALL
 local function getBall()
     for _,v in pairs(workspace:GetDescendants()) do
         if v.Name:lower():find("ball") then
@@ -23,11 +23,11 @@ end
 local Main = Window:CreateTab("Main")
 
 Main:CreateToggle({
-    Name = "Auto Follow Ball",
+    Name = "Auto Ball",
     CurrentValue = false,
     Callback = function(v)
-        _G.follow = v
-        while _G.follow do
+        _G.ball = v
+        while _G.ball do
             task.wait(0.15)
             local b = getBall()
             if b then
@@ -55,21 +55,6 @@ Main:CreateToggle({
     end
 })
 
-Main:CreateToggle({
-    Name = "Auto Position Pro",
-    CurrentValue = false,
-    Callback = function(v)
-        _G.pos = v
-        while _G.pos do
-            task.wait(0.2)
-            local b = getBall()
-            if b then
-                Player.Character:MoveTo(b.Position + Vector3.new(0,5,0))
-            end
-        end
-    end
-})
-
 -- PLAYER
 local PlayerTab = Window:CreateTab("Player")
 
@@ -91,21 +76,6 @@ PlayerTab:CreateSlider({
     end
 })
 
-PlayerTab:CreateToggle({
-    Name = "Air Control",
-    CurrentValue = false,
-    Callback = function(v)
-        _G.air = v
-        while _G.air do
-            task.wait()
-            local hum = Player.Character:FindFirstChild("Humanoid")
-            if hum and hum.FloorMaterial == Enum.Material.Air then
-                Player.Character:TranslateBy(Vector3.new(0,0.25,0))
-            end
-        end
-    end
-})
-
 -- VISUAL
 local Visual = Window:CreateTab("Visual")
 
@@ -116,38 +86,12 @@ Visual:CreateToggle({
         for _,p in pairs(game.Players:GetPlayers()) do
             if p ~= Player and p.Character then
                 if v then
-                    if not p.Character:FindFirstChild("ESP") then
-                        local h = Instance.new("Highlight")
-                        h.Name = "ESP"
-                        h.FillColor = Color3.fromRGB(0,255,255)
-                        h.Parent = p.Character
-                    end
+                    Instance.new("Highlight", p.Character)
                 else
-                    if p.Character:FindFirstChild("ESP") then
-                        p.Character.ESP:Destroy()
-                    end
-                end
-            end
-        end
-    end
-})
-
-Visual:CreateToggle({
-    Name = "ESP Ball",
-    CurrentValue = false,
-    Callback = function(v)
-        for _,b in pairs(workspace:GetDescendants()) do
-            if b.Name:lower():find("ball") then
-                if v then
-                    if not b:FindFirstChild("ESP") then
-                        local h = Instance.new("Highlight")
-                        h.Name = "ESP"
-                        h.FillColor = Color3.fromRGB(255,0,255)
-                        h.Parent = b
-                    end
-                else
-                    if b:FindFirstChild("ESP") then
-                        b.ESP:Destroy()
+                    for _,x in pairs(p.Character:GetChildren()) do
+                        if x:IsA("Highlight") then
+                            x:Destroy()
+                        end
                     end
                 end
             end

@@ -1,20 +1,22 @@
--- 🌌 SUPERNOVA HUB ULTRA
+-- 🌌 SUPERNOVA HUB GOD
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
     Name = "🌌 SUPERNOVA HUB",
     LoadingTitle = "Supernova",
-    LoadingSubtitle = "by Vini",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "SupernovaHub"
-    }
+    LoadingSubtitle = "GOD MODE",
 })
 
-local Player = game.Players.LocalPlayer
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
 
--- FUNÇÃO PRA PEGAR BOLA
+-- ESPERAR PERSONAGEM
+local function getChar()
+    return Player.Character or Player.CharacterAdded:Wait()
+end
+
+-- PEGAR BOLA
 local function getBall()
     for _,v in pairs(workspace:GetDescendants()) do
         if v.Name:lower():find("ball") then
@@ -23,8 +25,8 @@ local function getBall()
     end
 end
 
--- 🌟 MAIN
-local Main = Window:CreateTab("🌟 Main", 4483362458)
+-- MAIN
+local Main = Window:CreateTab("🌟 Main")
 
 Main:CreateToggle({
     Name = "Auto Follow Ball",
@@ -32,94 +34,104 @@ Main:CreateToggle({
     Callback = function(v)
         _G.follow = v
         while _G.follow do
-            task.wait(0.12)
-            local b = getBall()
-            if b then
-                Player.Character:MoveTo(b.Position)
+            task.wait(0.1)
+            local char = getChar()
+            local ball = getBall()
+            if char and ball then
+                char:MoveTo(ball.Position)
             end
         end
     end
 })
 
 Main:CreateToggle({
-    Name = "Aim Assist Pro",
+    Name = "Aim Assist GOD",
     CurrentValue = false,
     Callback = function(v)
         _G.aim = v
         while _G.aim do
             task.wait()
-            local b = getBall()
-            if b and Player.Character then
-                local root = Player.Character:FindFirstChild("HumanoidRootPart")
-                if root then
-                    root.CFrame = CFrame.new(root.Position, b.Position)
-                end
+            local char = getChar()
+            local ball = getBall()
+            if char and ball and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame =
+                    CFrame.new(char.HumanoidRootPart.Position, ball.Position)
             end
         end
     end
 })
 
 Main:CreateToggle({
-    Name = "Auto Position",
+    Name = "Auto Position PRO",
     CurrentValue = false,
     Callback = function(v)
         _G.pos = v
         while _G.pos do
-            task.wait(0.2)
-            local b = getBall()
-            if b then
-                Player.Character:MoveTo(b.Position + Vector3.new(0,5,0))
+            task.wait(0.15)
+            local char = getChar()
+            local ball = getBall()
+            if char and ball then
+                char:MoveTo(ball.Position + Vector3.new(0,5,0))
             end
         end
     end
 })
 
--- ⚡ PLAYER
-local PlayerTab = Window:CreateTab("⚡ Player", 4483362458)
+-- PLAYER
+local PlayerTab = Window:CreateTab("⚡ Player")
 
 PlayerTab:CreateSlider({
-    Name = "WalkSpeed",
-    Range = {16, 60},
+    Name = "Speed",
+    Range = {16,80},
     Increment = 1,
     CurrentValue = 16,
     Callback = function(v)
-        Player.Character.Humanoid.WalkSpeed = v
+        local char = getChar()
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then
+            hum.WalkSpeed = v
+        end
     end
 })
 
 PlayerTab:CreateSlider({
     Name = "Jump Power",
-    Range = {50, 150},
+    Range = {50,200},
     Increment = 5,
     CurrentValue = 50,
     Callback = function(v)
-        Player.Character.Humanoid.JumpPower = v
+        local char = getChar()
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then
+            hum.JumpPower = v
+        end
     end
 })
 
 PlayerTab:CreateToggle({
-    Name = "Air Control",
+    Name = "Air Control GOD",
     CurrentValue = false,
     Callback = function(v)
         _G.air = v
         while _G.air do
             task.wait()
-            local hum = Player.Character:FindFirstChild("Humanoid")
+            local char = getChar()
+            local hum = char:FindFirstChild("Humanoid")
             if hum and hum.FloorMaterial == Enum.Material.Air then
-                Player.Character:TranslateBy(Vector3.new(0,0.3,0))
+                char:TranslateBy(Vector3.new(0,0.4,0))
             end
         end
     end
 })
 
--- 👁️ VISUAL
-local Visual = Window:CreateTab("👁️ Visual", 4483362458)
+-- VISUAL
+local Visual = Window:CreateTab("👁️ Visual")
 
 Visual:CreateToggle({
     Name = "ESP Players",
     CurrentValue = false,
     Callback = function(v)
-        for _,p in pairs(game.Players:GetPlayers()) do
+        for _,p in pairs(Players:GetPlayers()) do
             if p ~= Player and p.Character then
                 if v then
                     if not p.Character:FindFirstChild("ESP") then
@@ -158,29 +170,5 @@ Visual:CreateToggle({
                 end
             end
         end
-    end
-})
-
--- ⚙️ EXTRA
-local Extra = Window:CreateTab("⚙️ Extra", 4483362458)
-
-Extra:CreateButton({
-    Name = "Rejoin Server",
-    Callback = function()
-        game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
-    end
-})
-
-Extra:CreateButton({
-    Name = "Reset Character",
-    Callback = function()
-        Player.Character.Humanoid.Health = 0
-    end
-})
-
-Extra:CreateButton({
-    Name = "Copy Loadstring",
-    Callback = function()
-        setclipboard('loadstring(game:HttpGet("https://raw.githubusercontent.com/viniciusbreda133-stack/roblox-hub/main/hub.lua"))()')
     end
 })

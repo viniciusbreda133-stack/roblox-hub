@@ -1,10 +1,12 @@
--- 🌌 SUPERNOVA VIDEO HUB
+-- 🌌 SUPERNOVA HUB PREMIUM (LINDO + ESTÁVEL)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local Camera = workspace.CurrentCamera
 
 -- SAFE
 local function getChar()
@@ -19,113 +21,95 @@ local function getRoot()
     return getChar():FindFirstChild("HumanoidRootPart")
 end
 
--- BALL
-local function getBall()
-    for _,v in pairs(workspace:GetDescendants()) do
-        if v.Name:lower():find("ball") then
-            return v
-        end
-    end
-end
-
--- UI
+-- 🌌 WINDOW
 local Window = Rayfield:CreateWindow({
-    Name = "🌌 SUPERNOVA VIDEO HUB",
+    Name = "🌌 SUPERNOVA PREMIUM",
     LoadingTitle = "SUPERNOVA",
-    LoadingSubtitle = "VIDEO VERSION"
+    LoadingSubtitle = "Stable Edition",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "SupernovaPremium",
+        FileName = "Config"
+    }
 })
 
-local Main = Window:CreateTab("Main")
-local Power = Window:CreateTab("Power")
-local Visual = Window:CreateTab("Visual")
+-- 🌟 MOVEMENT
+local Move = Window:CreateTab("🌟 Movement")
 
--- 🤖 AUTO PLAY
-Main:CreateToggle({
-    Name = "Auto Play",
+Move:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 28},
+    CurrentValue = 16,
+    Callback = function(v)
+        local hum = getHum()
+        if hum then hum.WalkSpeed = v end
+    end
+})
+
+Move:CreateSlider({
+    Name = "Jump Power",
+    Range = {50, 80},
+    CurrentValue = 50,
+    Callback = function(v)
+        local hum = getHum()
+        if hum then hum.JumpPower = v end
+    end
+})
+
+Move:CreateToggle({
+    Name = "Auto Jump (Treino)",
     CurrentValue = false,
     Callback = function(v)
-        _G.auto = v
+        _G.autojump = v
         task.spawn(function()
-            while _G.auto do
-                task.wait(0.1)
-                local char = getChar()
-                local ball = getBall()
-                if char and ball then
-                    char:MoveTo(ball.Position)
+            while _G.autojump do
+                task.wait(0.15)
+                local hum = getHum()
+                if hum and hum.FloorMaterial ~= Enum.Material.Air then
+                    hum:ChangeState(Enum.HumanoidStateType.Jumping)
                 end
             end
         end)
     end
 })
 
--- 🎯 AIM
-Main:CreateToggle({
-    Name = "Aim Assist",
+-- 🎯 CAMERA
+local Cam = Window:CreateTab("🎯 Camera")
+
+Cam:CreateSlider({
+    Name = "Field of View",
+    Range = {70, 110},
+    CurrentValue = 70,
+    Callback = function(v)
+        Camera.FieldOfView = v
+    end
+})
+
+Cam:CreateToggle({
+    Name = "Smooth Lock (Treino)",
     CurrentValue = false,
     Callback = function(v)
-        _G.aim = v
+        _G.lock = v
         task.spawn(function()
-            while _G.aim do
+            while _G.lock do
                 task.wait()
                 local root = getRoot()
-                local ball = getBall()
-                if root and ball then
-                    root.CFrame = CFrame.new(root.Position, ball.Position)
-                end
-            end
-        end)
-    end
-})
-
--- 💥 POWER
-Power:CreateSlider({
-    Name = "Spike Power",
-    Range = {1,200},
-    CurrentValue = 50,
-    Callback = function(v)
-        _G.spike = v
-    end
-})
-
-Power:CreateSlider({
-    Name = "Serve Power",
-    Range = {1,200},
-    CurrentValue = 50,
-    Callback = function(v)
-        _G.serve = v
-    end
-})
-
-Power:CreateToggle({
-    Name = "Auto Serve",
-    CurrentValue = false,
-    Callback = function(v)
-        _G.autoserve = v
-        task.spawn(function()
-            while _G.autoserve do
-                task.wait(1)
-                local hum = getHum()
-                if hum then
-                    hum:ChangeState("Jumping")
-                end
-            end
-        end)
-    end
-})
-
--- 🏐 HITBOX
-Visual:CreateToggle({
-    Name = "Hitbox Ball",
-    CurrentValue = false,
-    Callback = function(v)
-        _G.hitbox = v
-        task.spawn(function()
-            while _G.hitbox do
-                task.wait(0.2)
-                for _,b in pairs(workspace:GetDescendants()) do
-                    if b.Name:lower():find("ball") and b:IsA("BasePart") then
-                        b.Size = Vector3.new(12,12,12)
-                        b.Transparency = 0.3
+                if root then
+                    local closest, dist = nil, math.huge
+                    for _,p in pairs(Players:GetPlayers()) do
+                        if p ~= Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                            local d = (p.Character.HumanoidRootPart.Position - root.Position).Magnitude
+                            if d < dist then
+                                dist = d
+                                closest = p.Character.HumanoidRootPart
+                            end
+                        end
+                    end
+                    if closest then
+                        root.CFrame = root.CFrame:Lerp(
+                            CFrame.new(root.Position, closest.Position),
+                            0.2
+                        )
                     end
                 end
             end
@@ -133,24 +117,91 @@ Visual:CreateToggle({
     end
 })
 
--- 🌀 INFINITE JUMP (tipo infinite spin feel)
+-- 👁️ VISUAL
+local Visual = Window:CreateTab("👁️ Visual")
+
 Visual:CreateToggle({
-    Name = "Infinite Jump",
+    Name = "Highlight Players",
     CurrentValue = false,
     Callback = function(v)
-        _G.jump = v
+        for _,p in pairs(Players:GetPlayers()) do
+            if p ~= Player and p.Character then
+                if v then
+                    if not p.Character:FindFirstChild("SN_Highlight") then
+                        local h = Instance.new("Highlight")
+                        h.Name = "SN_Highlight"
+                        h.FillColor = Color3.fromRGB(0,255,255)
+                        h.OutlineColor = Color3.fromRGB(255,255,255)
+                        h.Parent = p.Character
+                    end
+                else
+                    if p.Character:FindFirstChild("SN_Highlight") then
+                        p.Character.SN_Highlight:Destroy()
+                    end
+                end
+            end
+        end
     end
 })
 
-UIS.JumpRequest:Connect(function()
-    if _G.jump then
-        local hum = getHum()
-        if hum then hum:ChangeState("Jumping") end
+Visual:CreateSlider({
+    Name = "Brightness",
+    Range = {0,5},
+    CurrentValue = 1,
+    Callback = function(v)
+        Lighting.Brightness = v
     end
-end)
+})
+
+Visual:CreateSlider({
+    Name = "Clock Time",
+    Range = {0,24},
+    CurrentValue = 14,
+    Callback = function(v)
+        Lighting.ClockTime = v
+    end
+})
+
+-- 🧪 PRACTICE
+local Practice = Window:CreateTab("🧪 Practice")
+
+Practice:CreateButton({
+    Name = "Teleport Up",
+    Callback = function()
+        local root = getRoot()
+        if root then
+            root.CFrame = root.CFrame + Vector3.new(0,20,0)
+        end
+    end
+})
+
+Practice:CreateButton({
+    Name = "Reset Character",
+    Callback = function()
+        local hum = getHum()
+        if hum then hum.Health = 0 end
+    end
+})
+
+-- ⚙️ EXTRA
+local Extra = Window:CreateTab("⚙️ Extra")
+
+Extra:CreateButton({
+    Name = "Rejoin Server",
+    Callback = function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
+    end
+})
+
+Extra:CreateButton({
+    Name = "Copy Loadstring",
+    Callback = function()
+        setclipboard('loadstring(game:HttpGet("https://raw.githubusercontent.com/viniciusbreda133-stack/roblox-hub/main/hub.lua"))()')
+    end
+})
 
 Rayfield:Notify({
-    Title = "SUPERNOVA",
-    Content = "Modo vídeo ativado 💀🔥",
+    Title = "🌌 SUPERNOVA",
+    Content = "Premium carregado com sucesso 🚀",
     Duration = 5
 })

@@ -6,7 +6,6 @@ local VirtualUser = game:GetService("VirtualUser")
 
 local localPlayer = Players.LocalPlayer
 
--- VARS
 local running = false
 local rewardId = 1
 local antiAfk = nil
@@ -15,30 +14,27 @@ local bypassAtivo = false
 local pityBugada = false
 local nickRemovido = false
 
--- WINDOW
+-- janela principal (ALTERADO PRA SUPERNOVA)
 local Window = Rayfield:CreateWindow({
-   Name = "Banana VBL (não tem relação com banana hub)",
-   LoadingTitle = "Método Lucky Spin da Banana",
-   LoadingSubtitle = "Inicializando...",
+   Name = "☄️ SUPERNOVA HUB",
+   LoadingTitle = "SUPERNOVA SYSTEM",
+   LoadingSubtitle = "Inicializando Núcleo...",
    Theme = "AmberGlow",
    ToggleUIKeybind = "F8",
 
    ConfigurationSaving = {
       Enabled = true,
-      FileName = "BananaVBL"
+      FileName = "SupernovaHub"
    }
 })
 
--- TABS
-local tabAutomation = Window:CreateTab("🍌 LuckySpin", 4483362458)
-local tabPlayer = Window:CreateTab("👤 Jogador", 4483362458)
-local tabUI = Window:CreateTab("⚙️ Menu", 4483362458)
+-- abas (ALTERADO NOMES)
+local tabAutomation = Window:CreateTab("☄️ Supernova Core", 4483362458)
+local tabPlayer = Window:CreateTab("🧑‍🚀 Operador", 4483362458)
+local tabUI = Window:CreateTab("⚙️ Sistema", 4483362458)
 
--- =========================
--- 🍌 AUTO REWARD (MELHORADO)
--- =========================
-
-tabAutomation:CreateSection("Recompensas")
+-- CORE
+tabAutomation:CreateSection("Controle de Energia")
 
 tabAutomation:CreateToggle({
    Name = "Auto Coletar Recompensas",
@@ -49,9 +45,6 @@ tabAutomation:CreateToggle({
       running = state
 
       if running then
-
-         rewardId = 1
-
          local claim = ReplicatedStorage
             :WaitForChild("Packages")
             :WaitForChild("_Index")
@@ -64,76 +57,66 @@ tabAutomation:CreateToggle({
 
          task.spawn(function()
             while running do
-
-               local success = pcall(function()
+               pcall(function()
                   claim:InvokeServer(rewardId)
                end)
 
-               if success then
-                  rewardId += 1
-               else
-                  rewardId = 1
-               end
-
-               task.wait(0.7) -- mais suave
+               rewardId += 1
+               task.wait(0.5)
             end
          end)
       end
    end
 })
 
--- =========================
--- 🔰 BYPASS (mantido, mas seguro)
--- =========================
-
 tabAutomation:CreateToggle({
-   Name = "🔰 Bypass Anti-Ban (70% menos chance)",
+   Name = "🔰 Estabilizador Anti-Ban",
    CurrentValue = false,
    Flag = "BypassAntiBan",
    Callback = function(state)
       bypassAtivo = state
-
-      Rayfield:Notify({
-         Title = "🔰 BYPASS",
-         Content = state and "Ativado" or "Desativado",
-         Duration = 2
-      })
+      if state then
+         Rayfield:Notify({
+            Title = "☄️ SUPERNOVA",
+            Content = "Estabilizador ativado",
+            Duration = 3
+         })
+      end
    end
 })
 
 tabAutomation:CreateToggle({
-   Name = "⚡ Pity Bugada (reset infinito)",
+   Name = "⚡ Núcleo de Sorte (Pity)",
    CurrentValue = false,
    Flag = "PityBug",
    Callback = function(state)
       pityBugada = state
-
-      Rayfield:Notify({
-         Title = "⚡ PITY",
-         Content = state and "Ativado" or "Desativado",
-         Duration = 2
-      })
+      if state then
+         Rayfield:Notify({
+            Title = "☄️ SUPERNOVA",
+            Content = "Núcleo de sorte energizado",
+            Duration = 3
+         })
+      end
    end
 })
 
--- =========================
--- 👤 PLAYER
--- =========================
-
-tabPlayer:CreateSection("Jogador")
+-- JOGADOR
+tabPlayer:CreateSection("Operador")
 
 tabPlayer:CreateToggle({
-   Name = "👤 Modo Anônimo (remove nick dos logs)",
+   Name = "👤 Modo Espectral",
    CurrentValue = false,
    Flag = "ModoAnonimo",
    Callback = function(state)
       nickRemovido = state
-
-      Rayfield:Notify({
-         Title = "👤 MODO ANÔNIMO",
-         Content = state and "Ativado" or "Desativado",
-         Duration = 2
-      })
+      if state then
+         Rayfield:Notify({
+            Title = "☄️ SUPERNOVA",
+            Content = "Modo espectral ativado",
+            Duration = 3
+         })
+      end
    end
 })
 
@@ -143,34 +126,27 @@ tabPlayer:CreateToggle({
    Flag = "AntiAfk",
 
    Callback = function(enabled)
-
       if enabled then
-
          if antiAfk then
             antiAfk:Disconnect()
          end
 
          antiAfk = localPlayer.Idled:Connect(function()
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
+            VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            task.wait(1)
+            VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
          end)
-
       else
-
          if antiAfk then
             antiAfk:Disconnect()
             antiAfk = nil
          end
-
       end
    end
 })
 
--- =========================
--- ⚙️ MENU
--- =========================
-
-tabUI:CreateSection("Interface")
+-- INTERFACE
+tabUI:CreateSection("Sistema")
 
 tabUI:CreateButton({
    Name = "Fechar Interface",
@@ -184,12 +160,9 @@ tabUI:CreateParagraph({
    Content = "Pressione F8 para abrir ou esconder o menu."
 })
 
--- =========================
--- START
--- =========================
-
+-- notificação inicial (ALTERADA)
 Rayfield:Notify({
-   Title = "Banana VBL 🍌",
-   Content = "Script carregado (versão otimizada)",
+   Title = "☄️ SUPERNOVA HUB",
+   Content = "Sistema carregado com sucesso.",
    Duration = 4
 })
